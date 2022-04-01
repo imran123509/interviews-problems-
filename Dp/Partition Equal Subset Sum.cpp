@@ -1,13 +1,11 @@
 #include <bits/stdc++.h>
-// pre req => cherry pickup
+// pre req => equal subset sum equal to target
 using namespace std;
 //memoize solution
-
 /*
+Time Complexity: O(N*K) + O(N)
 
-Time Complexity: O(N*K)
-
-Reason: There are N*K states therefore at max ‘N*K’ new problems will be solved.
+Reason: There are N*K states therefore at max ‘N*K’ new problems will be solved and we are running a for loop for ‘N’ times to calculate the total sum
 
 Space Complexity: O(N*K) + O(N)
 
@@ -31,62 +29,82 @@ bool subsetSumUtil(int ind, int target, vector<int>& arr, vector<vector<int>> &d
         
     return dp[ind][target]= notTaken||taken;
 }
+
 //tabulation solution
 
 /*
 
-Time Complexity: O(N*K)
+Time Complexity: O(N*K) +O(N)
 
-Reason: There are two nested loops
+Reason: There are two nested loops that account for O(N*K) and at starting we are running a for loop to calculate totSum.
 
 Space Complexity: O(N*K)
 
 Reason: We are using an external array of size ‘N*K’. Stack Space is eliminated.
 */
-bool subsetSumToK1(int n, int k, vector<int> &arr){
-    vector<vector<bool>> dp(n,vector<bool>(k+1,false));
+bool canPartition1(int n, vector<int> &arr){
     
-    for(int i=0; i<n; i++){
-        dp[i][0] = true;
+    int totSum=0;
+    
+    for(int i=0; i<n;i++){
+        totSum+= arr[i];
     }
     
-    if(arr[0]<=k)
-        dp[0][arr[0]] = true;
+    if (totSum%2==1) return false;
     
-    for(int ind = 1; ind<n; ind++){
-        for(int target= 1; target<=k; target++){
-            
-            bool notTaken = dp[ind-1][target];
+    else{
+        int k = totSum/2;
+        vector<vector<bool>> dp(n,vector<bool>(k+1,false));
     
-            bool taken = false;
-                if(arr[ind]<=target)
-                    taken = dp[ind-1][target-arr[ind]];
-        
-            dp[ind][target]= notTaken||taken;
+        for(int i=0; i<n; i++){
+            dp[i][0] = true;
         }
-    }
-    
-    return dp[n-1][k];
+        
+        if(arr[0]<=k)
+            dp[0][arr[0]] = true;
+        
+        for(int ind = 1; ind<n; ind++){
+            for(int target= 1; target<=k; target++){
+                
+                bool notTaken = dp[ind-1][target];
+        
+                bool taken = false;
+                    if(arr[ind]<=target)
+                        taken = dp[ind-1][target-arr[ind]];
+            
+                dp[ind][target]= notTaken||taken;
+            }
+        }
+        
+        return dp[n-1][k];
+
+    } 
 }
 
-bool subsetSumToK(int n, int k, vector<int> &arr){
-    vector<vector<int>> dp(n,vector<int>(k+1,-1));
+bool canPartition(int n, vector<int> &arr){
     
-    return subsetSumUtil(n-1,k,arr,dp);
+    int totSum=0;
+    
+    for(int i=0; i<n;i++){
+        totSum+= arr[i];
+    }
+    
+    if (totSum%2==1) return false;
+    
+    else{
+        int k = totSum/2;
+        vector<vector<int>> dp(n,vector<int>(k+1,-1));
+        return subsetSumUtil(n-1,k,arr,dp);
+    } 
 }
 
 int main() {
 
-  vector<int> arr = {1,2,3,4};
-  int k=4;
+  vector<int> arr = {2,3,3,3,4,5};
   int n = arr.size();
                                  
-  if(subsetSumToK(n,k,arr))
-    cout<<"Subset with given target found";
+  if(canPartition(n,arr))
+    cout<<"The Array can be partitioned into two equal subsets";
   else 
-    cout<<"Subset with given target not found";
+    cout<<"The Array cannot be partitioned into two equal subsets";
 }
-
-
-
-//https://leetcode.com/problems/partition-equal-subset-sum/description/
